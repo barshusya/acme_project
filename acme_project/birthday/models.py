@@ -28,4 +28,4 @@ class Birthday(models.Model):
         )
 
     def get_absolute_url(self):
-        return reverse('birthday:detal', kwargs={'pk': self.pk})
+        return reverse('birthday:detail', kwargs={'pk': self.pk})
