@@ -23,7 +23,10 @@ class Birthday(models.Model):
         blank=True,
     )
     author = models.ForeignKey(
-        User, verbose_name='Автор записи', on_delete=models.CASCADE, null=True,
+        User,
+        verbose_name='Автор записи',
+        on_delete=models.CASCADE,
+        null=True,
     )
 
     class Meta:
@@ -36,3 +39,20 @@ class Birthday(models.Model):
 
     def get_absolute_url(self):
         return reverse('birthday:detail', kwargs={'pk': self.pk})
+
+
+class Congratulation(models.Model):
+    text = models.TextField('Текст поздравления')
+    birthday = models.ForeignKey(
+        Birthday,
+        on_delete=models.CASCADE,
+        related_name='congratulations',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        ordering = ('created_at',)

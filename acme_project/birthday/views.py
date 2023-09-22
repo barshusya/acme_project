@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
 from django.urls import reverse_lazy
 
-from birthday.forms import BirthdayForm
+from birthday.forms import BirthdayForm, CongratulationForm
 from birthday.models import Birthday
 from birthday.utils import calculate_birthday_countdown
 
@@ -58,4 +58,24 @@ class BirthdayDetailView(DetailView):
         context['birthday_countdown'] = calculate_birthday_countdown(
             self.object.birthday  # type: ignore
         )
+        context['form'] = CongratulationForm()
+        context['congratulations'] = (
+            self.object.congratulations.select_related(  # type: ignore
+                'author'
+            )
+        )
         return context
+
+
+@login_required
+def add_comment(request, pk):
+    birthday = get_object_or_404(Birthday, pk=pk)
+    form = CongratulationForm(request.POST)
+
+    if form.is_valid():
+        congratulation = form.save(commit=False)
+        congratulation.author = request.user
+        congratulation.birthday = birthday
+        congratulation.save()
+
+    return redirect('birthday:detail', pk=pk)
